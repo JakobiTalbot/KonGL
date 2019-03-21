@@ -45,9 +45,9 @@ bool Application3D::startup() {
 	}
 
 	// load mesh
-	if (!m_pMesh->load("./models/Banana_01.obj", true, true))
+	if (!m_pMesh->load("./models/soulspear.obj", true, true))
 	{
-		printf("Bunny Mesh Error!\n");
+		printf("Mesh Load Error!\n");
 		system("pause");
 		return false;
 	}
@@ -55,9 +55,9 @@ bool Application3D::startup() {
 	// create mesh transform
 	m_m4MeshTransform =
 	{
-		0.1f, 0, 0, 0,
-		0, 0.1f, 0, 0,
-		0, 0, 0.1f, 0,
+		1.f, 0, 0, 0,
+		0, 1.f, 0, 0,
+		0, 0, 1.f, 0,
 		0, 0, 0, 1
 	};
 
@@ -94,12 +94,10 @@ void Application3D::update(float deltaTime) {
 						vec3(-10, 0, -10 + i),
 						i == 10 ? white : black);
 	}
+	m_pCamera->Update(deltaTime);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
-
-	m_pCamera->Update(deltaTime);
-
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
 }
