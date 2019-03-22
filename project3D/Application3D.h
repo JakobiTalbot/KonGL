@@ -28,4 +28,19 @@ protected:
 
 	aie::OBJMesh* m_pMesh;
 	glm::mat4 m_m4MeshTransform;
+
+	Mesh m_quad;
+	glm::mat4 m_m4QuadTransform;
+
+	struct Light
+	{
+		glm::vec3 v3Direction;
+		glm::vec3 v3Diffuse;
+		glm::vec3 v3Specular;
+	};
+
+	Light m_light;
+	glm::vec3 m_v3AmbientLight;
+
+	GLFWwindow* m_window;
 };

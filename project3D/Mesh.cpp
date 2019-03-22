@@ -81,12 +81,24 @@ void Mesh::InitQuad()
 	vertices[4].v2TexCoord = { 1, 1 };
 	vertices[5].v2TexCoord = { 1, 0 };
 
+	// define normals
+	vertices[0].v4Normal = { 0, 1, 0, 0 };
+	vertices[1].v4Normal = { 0, 1, 0, 0 };
+	vertices[2].v4Normal = { 0, 1, 0, 0 };
+	vertices[3].v4Normal = { 0, 1, 0, 0 };
+	vertices[4].v4Normal = { 0, 1, 0, 0 };
+	vertices[5].v4Normal = { 0, 1, 0, 0 };
+
 	// fill vertex buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 6, vertices, GL_STATIC_DRAW);
 
 	// enable first element as position
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+
+	// enable second element as normal
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)16);
 
 	// enable third element as texture
 	glEnableVertexAttribArray(2);

@@ -1,22 +1,39 @@
 #pragma once
-#include <glm/glm.hpp>
+
 #include <glm/ext.hpp>
-class Camera
-{
+
+class Camera {
 public:
 	Camera();
-	Camera(glm::vec3 v3Position);
-	~Camera();
 
-	void Update(float fDeltaTime);
+	// called every frame to process mouse and keyboard inputs
+	// and update the view matrix
+	void Update(float delta);
 
-	glm::mat4 GetViewMatrix() { return glm::lookAt(m_v3Position, glm::vec3(0), glm::vec3(0, 1, 0)); }
+	// the current view matrix
+	glm::mat4 GetView() const { return m_m4View; }
+	// the transformation matrix
+	glm::mat4 GetTransform() const { return glm::inverse(m_m4View); }
 
-protected:
-	glm::mat4 m_viewMatrix;
+	// add to rotation
+	void Rotate(glm::vec2 r) { m_v3Rotation += r; }
+	// add to position
+	void Move(glm::vec3 d) { m_v3Position += d; }
+
+	// sets whether or not the cursor is captured by the game
+	void SetLockCursor(bool l);
+	// returns whether or not the cursor is currently locked to the window
+	bool GetLockCursor() const { return m_bLockCursor; }
+private:
+	// how fast move.
+	float m_moveSpeed;
+
+	// view matrix
+	glm::mat4 m_m4View;
+	// individual transformations
 	glm::vec3 m_v3Position;
-	glm::vec3 m_v3Rotation;
-	float m_fMoveSpeed = 10.f;
-	float m_fRotateSpeed = 10.f;
-	float m_fLastMouseScroll = 0.f;
+	glm::vec2 m_v3Rotation;
+
+	// whether or not the cursor is locked to the window
+	bool m_bLockCursor;
 };

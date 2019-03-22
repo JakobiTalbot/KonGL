@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include "Camera.h"
+#include <GLFW/glfw3.h>
 
 using glm::vec3;
 using glm::vec4;
@@ -31,6 +32,13 @@ bool Application3D::startup() {
 										  0.1f, 1000.f);
 	m_pCamera = new Camera();
 	m_pMesh = new aie::OBJMesh();
+	m_quad.InitQuad();
+
+	m_window = glfwGetCurrentContext();
+
+	m_light.v3Diffuse = { 1, 1, 1 };
+	m_light.v3Specular = { 1, 1, 1 };
+	m_v3AmbientLight = { 0.25f, 0.25f, 0.25f };
 
 	// load vertex and fragment shaders
 	m_shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
@@ -45,7 +53,7 @@ bool Application3D::startup() {
 	}
 
 	// load mesh
-	if (!m_pMesh->load("./models/soulspear.obj", true, true))
+	if (!m_pMesh->load("./models/Dragon.obj", true, true))
 	{
 		printf("Mesh Load Error!\n");
 		system("pause");
@@ -55,11 +63,21 @@ bool Application3D::startup() {
 	// create mesh transform
 	m_m4MeshTransform =
 	{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	m_m4QuadTransform =
+	{
 		1.f, 0, 0, 0,
 		0, 1.f, 0, 0,
 		0, 0, 1.f, 0,
 		0, 0, 0, 1
 	};
+
+	m_pCamera->SetLockCursor(true);
 
 	return true;
 }
@@ -73,6 +91,8 @@ void Application3D::shutdown() {
 
 	delete m_pMesh;
 	m_pMesh = nullptr;
+
+	m_window = nullptr;
 }
 
 void Application3D::update(float deltaTime) {
@@ -94,12 +114,35 @@ void Application3D::update(float deltaTime) {
 						vec3(-10, 0, -10 + i),
 						i == 10 ? white : black);
 	}
+
+	// update camera
 	m_pCamera->Update(deltaTime);
 
-	// quit if we press escape
+	// update light
+	//m_light.v3Direction = glm::normalize(vec3(glm::cos(getTime() * 2), glm::sin(getTime() * 2), 0));
+	m_light.v3Direction = -glm::vec3(m_pCamera->GetTransform()[2]);
+
 	aie::Input* input = aie::Input::getInstance();
-	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
-		quit();
+
+	// if escape is pressed and cursor is locked then unlock cursor
+	// if cursor is already unlocked then quit application
+	if (input->wasKeyPressed(aie::INPUT_KEY_ESCAPE))
+	{
+		if (!m_pCamera->GetLockCursor())
+		{
+			quit();
+		}
+		else
+		{
+			glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			m_pCamera->SetLockCursor(false);
+		}
+	}
+
+	// if cursor is unlocked and the screen is clicked then lock cursor
+	if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT) && !m_pCamera->GetLockCursor()) {
+		m_pCamera->SetLockCursor(true);
+	}
 }
 
 void Application3D::draw() {
@@ -116,14 +159,31 @@ void Application3D::draw() {
 	m_shader.bind();
 
 	// bind transform
-	auto meshPVM = m_projectionMatrix * m_pCamera->GetViewMatrix() * m_m4MeshTransform;
+	auto meshPVM = m_projectionMatrix * m_pCamera->GetView() * m_m4MeshTransform;
 	m_shader.bindUniform("m4ProjectionViewModel", meshPVM);
+
+	// bind normal
+	m_shader.bindUniform("m3NormalMatrix", glm::inverseTranspose(glm::mat3(m_m4MeshTransform)));
+
+	// bind camera position
+	m_shader.bindUniform("cameraPosition", glm::vec3(glm::inverse(m_pCamera->GetView())[3]));
+
+	// bind model matrix
+	m_shader.bindUniform("m4ModelMatrix", m_m4MeshTransform);
+
+	// bind light variables
+	m_shader.bindUniform("Ia", m_v3AmbientLight);
+	m_shader.bindUniform("Id", m_light.v3Diffuse);
+	m_shader.bindUniform("Is", m_light.v3Specular);
+	m_shader.bindUniform("LightDirection", m_light.v3Direction);
 
 	//m_quadMesh.Draw();
 	m_pMesh->draw();
 
+	//m_quad.Draw();
+
 	// draw 3D gizmos
-	Gizmos::draw(m_projectionMatrix * m_pCamera->GetViewMatrix());
+	Gizmos::draw(m_projectionMatrix * m_pCamera->GetView());
 	
 	// draw 2D gizmos using an orthogonal projection matrix (or screen dimensions)
 	Gizmos::draw2D((float)getWindowWidth(), (float)getWindowHeight());
