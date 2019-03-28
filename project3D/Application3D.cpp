@@ -63,7 +63,7 @@ bool Application3D::startup() {
 	}
 
 	// load mesh
-	if (!m_pMesh->load("./models/model-triangulated.obj", true, true))
+	if (!m_pMesh->load("./models/C++.obj", true, true))
 	{
 		printf("Mesh Load Error!\n");
 		system("pause");
@@ -78,7 +78,7 @@ bool Application3D::startup() {
 		return false;
 	}
 	
-	const int nScale = 5;
+	const int nScale = 1;
 	// create mesh transform
 	m_m4MeshTransform =
 	{
@@ -201,6 +201,10 @@ void Application3D::draw() {
 	m_postProcessing.bindUniform("width", (float)getWindowWidth());
 	m_postProcessing.bindUniform("height", (float)getWindowHeight());
 	m_postProcessing.bindUniform("centre", glm::vec2((float)getWindowWidth() / 2, (float)getWindowHeight() / 2));
+
+	// crosshatch uniforms
+	m_postProcessing.bindUniform("offset", 10.0f);
+	m_postProcessing.bindUniform("hatch_y_offset", 10.0f);
 	m_renderTarget.getTarget(0).bind(0);
 
 	m_fullscreenQuad.Draw();

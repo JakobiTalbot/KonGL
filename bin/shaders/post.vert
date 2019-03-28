@@ -1,3 +1,5 @@
+// shader for storing all post-processing effects
+// should put each post processing effect in different shaders though
 #version 410
 
 layout( location = 0) in vec2 Position;

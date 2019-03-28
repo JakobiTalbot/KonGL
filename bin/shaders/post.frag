@@ -8,8 +8,16 @@ uniform float height;
 
 // swirl effect parameters
 uniform float radius = 400.0f;
-uniform float angle = 1.0f;
+uniform float angle = 0.7f;
 uniform vec2 centre = vec2(0.0f, 0.0f);
+
+// crosshatch effect parameters
+uniform float offset;
+uniform float hatch_y_offset;
+uniform float lum_threshold_1 = 1.0f;
+uniform float lum_threshold_2 = 0.7f;
+uniform float lum_threshold_3 = 0.5f;
+uniform float lum_threshold_4 = 0.3f;
 
 out vec4 FragColour;
 
@@ -56,6 +64,35 @@ vec4 Blur(vec2 texCoord)
 		col += sampleTex[i] * kernel[i];
 
 	return vec4(col, 1.0f);
+}
+
+vec4 Crosshatch(vec2 texCoord, bool invert)
+{
+	vec3 tc = vec3(1, 0, 0);
+
+	if (texCoord.x < offset - 0.005f)
+	{
+		float lum = length(texture(colourTarget, texCoord).xyz);
+		tc = vec3(1);
+
+		if (lum < lum_threshold_1 && mod(gl_FragCoord.x + gl_FragCoord.y, 10.0f) == 0.0f)
+			tc = vec3(0);
+		else if (lum < lum_threshold_2 && mod(gl_FragCoord.x - gl_FragCoord.y, 10.0f) == 0.0f)
+			tc = vec3(0);
+		else if (lum < lum_threshold_3 && mod(gl_FragCoord.x + gl_FragCoord.y - hatch_y_offset, 10.0f) == 0.0f)
+			tc = vec3(0);
+		else if (lum < lum_threshold_4 && mod(gl_FragCoord.x - gl_FragCoord.y - hatch_y_offset, 10.0f) == 0.0f)
+			tc = vec3(0);
+	}
+	else if (texCoord.x >= offset + 0.005f)
+		tc = texture(colourTarget, texCoord).xyz;
+
+	vec4 test = vec4(tc, 1);
+
+	if (invert)
+		return vec4(vec3(1.0f - test), 1.0f);
+	else
+		return test;
 }
 
 // distorts to centre of screen
@@ -255,5 +292,5 @@ void main()
 	vec2 texCoord = vTexCoord / scale + texelSize * 0.5f;
 
 	// set frag colour
-	FragColour = Swirl(texCoord);
+	FragColour = Distort(texCoord);
 }
