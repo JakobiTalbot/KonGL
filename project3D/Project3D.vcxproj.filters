@@ -36,6 +36,9 @@
     <ClCompile Include="OBJMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application3D.h">
@@ -56,6 +59,9 @@
     <ClInclude Include="tiny_obj_loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\simple.frag">
@@ -68,6 +74,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\textured.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\post.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\post.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -3,6 +3,7 @@
 in vec4 vPosition;
 in vec2 vTexCoord;
 in vec3 vNormal;
+in vec4 vColour;
 
 uniform sampler2D diffuseTexture;
 
@@ -42,6 +43,5 @@ void main()
 	vec3 diffuse = Id * Kd * lambertTerm;
 	vec3 specular = Is * Ks * specularTerm;
 
-	//FragColour = texture(diffuseTexture, vTexCoord);
-	FragColour = vec4(diffuse + ambient + specular, 1);
+	FragColour = vec4(diffuse + ambient + specular, 1) + texture(diffuseTexture, vTexCoord);
 }

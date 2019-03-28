@@ -35,10 +35,17 @@ void Camera::Update(float delta)
 		move += trans[0];
 	// up
 	if (input->isKeyDown(aie::INPUT_KEY_E))
-		move += trans[1];
+		move += glm::vec4(0, 1, 0, 0);
 	// down
 	if (input->isKeyDown(aie::INPUT_KEY_Q))
-		move -= trans[1];
+		move -= glm::vec4(0, 1, 0, 0);
+
+	// move faster if shift is held
+	if (input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT))
+		move *= 2;
+	// move slower if ctrl is held
+	else if (input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL))
+		move *= 0.5f;
 
 	this->Move(glm::vec3(move) * m_moveSpeed * delta);
 

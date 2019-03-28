@@ -21,7 +21,7 @@ Application3D::~Application3D() {
 
 bool Application3D::startup() {
 	
-	setBackgroundColour(0.25f, 0.25f, 0.25f);
+	setBackgroundColour(0, 0.8f, 1);
 	
 	// initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
@@ -32,48 +32,59 @@ bool Application3D::startup() {
 										  0.1f, 1000.f);
 	m_pCamera = new Camera();
 	m_pMesh = new aie::OBJMesh();
-	m_quad.InitQuad();
+	m_fullscreenQuad.InitialiseFullscreenQuad();
 
 	m_window = glfwGetCurrentContext();
-
 	m_light.v3Diffuse = { 1, 1, 1 };
 	m_light.v3Specular = { 1, 1, 1 };
 	m_v3AmbientLight = { 0.25f, 0.25f, 0.25f };
 
 	// load vertex and fragment shaders
-	m_shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
-	m_shader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/textured.frag");
+	m_textureShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
+	m_textureShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/textured.frag");
 
 	// check for error in shader
-	if (!m_shader.link())
+	if (!m_textureShader.link())
 	{
-		printf("Shader Error: %s\n", m_shader.getLastError());
+		printf("Shader Error: %s\n", m_textureShader.getLastError());
+		system("pause");
+		return false;
+	}
+
+	// load post-processing vertex and fragment shaders
+	m_postProcessing.loadShader(aie::eShaderStage::VERTEX, "./shaders/post.vert");
+	m_postProcessing.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post.frag");
+
+	if (!m_postProcessing.link())
+	{
+		printf("Post-processing Shader Load Error: %s\n", m_postProcessing.getLastError());
 		system("pause");
 		return false;
 	}
 
 	// load mesh
-	if (!m_pMesh->load("./models/Dragon.obj", true, true))
+	if (!m_pMesh->load("./models/model-triangulated.obj", true, true))
 	{
 		printf("Mesh Load Error!\n");
 		system("pause");
 		return false;
 	}
 
+	// create render target
+	if (!m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()))
+	{
+		printf("Render Target Initialisation Error!\n");
+		system("pause");
+		return false;
+	}
+	
+	const int nScale = 5;
 	// create mesh transform
 	m_m4MeshTransform =
 	{
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	};
-
-	m_m4QuadTransform =
-	{
-		1.f, 0, 0, 0,
-		0, 1.f, 0, 0,
-		0, 0, 1.f, 0,
+		nScale, 0, 0, 0,
+		0, nScale, 0, 0,
+		0, 0, nScale, 0,
 		0, 0, 0, 1
 	};
 
@@ -104,22 +115,21 @@ void Application3D::update(float deltaTime) {
 	Gizmos::clear();
 
 	// draw a simple grid with gizmos
-	vec4 white(1);
-	vec4 black(0, 0, 0, 1);
-	for (int i = 0; i < 21; ++i) {
-		Gizmos::addLine(vec3(-10 + i, 0, 10),
-						vec3(-10 + i, 0, -10),
-						i == 10 ? white : black);
-		Gizmos::addLine(vec3(10, 0, -10 + i),
-						vec3(-10, 0, -10 + i),
-						i == 10 ? white : black);
-	}
+	//vec4 white(1);
+	//vec4 black(0, 0, 0, 1);
+	//for (int i = 0; i < 21; ++i) {
+	//	Gizmos::addLine(vec3(-10 + i, 0, 10),
+	//					vec3(-10 + i, 0, -10),
+	//					i == 10 ? white : black);
+	//	Gizmos::addLine(vec3(10, 0, -10 + i),
+	//					vec3(-10, 0, -10 + i),
+	//					i == 10 ? white : black);
+	//}
 
 	// update camera
 	m_pCamera->Update(deltaTime);
 
 	// update light
-	//m_light.v3Direction = glm::normalize(vec3(glm::cos(getTime() * 2), glm::sin(getTime() * 2), 0));
 	m_light.v3Direction = -glm::vec3(m_pCamera->GetTransform()[2]);
 
 	aie::Input* input = aie::Input::getInstance();
@@ -147,6 +157,9 @@ void Application3D::update(float deltaTime) {
 
 void Application3D::draw() {
 
+	// bind render target
+	m_renderTarget.bind();
+
 	// wipe the screen to the background colour
 	clearScreen();
 
@@ -156,31 +169,41 @@ void Application3D::draw() {
 										  0.1f, 1000.f);
 
 	// bind shader
-	m_shader.bind();
+	m_textureShader.bind();
+
+	// bind light variables
+	m_textureShader.bindUniform("Ia", m_v3AmbientLight);
+	m_textureShader.bindUniform("Id", m_light.v3Diffuse);
+	m_textureShader.bindUniform("Is", m_light.v3Specular);
+	m_textureShader.bindUniform("LightDirection", m_light.v3Direction);
 
 	// bind transform
 	auto meshPVM = m_projectionMatrix * m_pCamera->GetView() * m_m4MeshTransform;
-	m_shader.bindUniform("m4ProjectionViewModel", meshPVM);
+	m_textureShader.bindUniform("m4ProjectionViewModel", meshPVM);
 
 	// bind normal
-	m_shader.bindUniform("m3NormalMatrix", glm::inverseTranspose(glm::mat3(m_m4MeshTransform)));
+	m_textureShader.bindUniform("m3NormalMatrix", glm::inverseTranspose(glm::mat3(m_m4MeshTransform)));
 
 	// bind camera position
-	m_shader.bindUniform("cameraPosition", glm::vec3(glm::inverse(m_pCamera->GetView())[3]));
+	m_textureShader.bindUniform("cameraPosition", glm::vec3(glm::inverse(m_pCamera->GetView())[3]));
 
 	// bind model matrix
-	m_shader.bindUniform("m4ModelMatrix", m_m4MeshTransform);
+	m_textureShader.bindUniform("m4ModelMatrix", m_m4MeshTransform);
 
-	// bind light variables
-	m_shader.bindUniform("Ia", m_v3AmbientLight);
-	m_shader.bindUniform("Id", m_light.v3Diffuse);
-	m_shader.bindUniform("Is", m_light.v3Specular);
-	m_shader.bindUniform("LightDirection", m_light.v3Direction);
-
-	//m_quadMesh.Draw();
+	// draw mesh
 	m_pMesh->draw();
 
-	//m_quad.Draw();
+	m_renderTarget.unbind();
+	clearScreen();
+
+	m_postProcessing.bind();
+	m_postProcessing.bindUniform("colourTarget", 0);
+	m_postProcessing.bindUniform("width", (float)getWindowWidth());
+	m_postProcessing.bindUniform("height", (float)getWindowHeight());
+	m_postProcessing.bindUniform("centre", glm::vec2((float)getWindowWidth() / 2, (float)getWindowHeight() / 2));
+	m_renderTarget.getTarget(0).bind(0);
+
+	m_fullscreenQuad.Draw();
 
 	// draw 3D gizmos
 	Gizmos::draw(m_projectionMatrix * m_pCamera->GetView());

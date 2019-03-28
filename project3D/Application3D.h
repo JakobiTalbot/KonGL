@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
+#include "RenderTarget.h"
 
 class Camera;
 
@@ -24,13 +25,13 @@ protected:
 	Camera* m_pCamera;
 	glm::mat4	m_projectionMatrix;
 
-	aie::ShaderProgram m_shader;
+	aie::ShaderProgram m_textureShader;
+	aie::ShaderProgram m_postProcessing;
 
 	aie::OBJMesh* m_pMesh;
 	glm::mat4 m_m4MeshTransform;
 
-	Mesh m_quad;
-	glm::mat4 m_m4QuadTransform;
+	Mesh m_fullscreenQuad;
 
 	struct Light
 	{
@@ -43,4 +44,6 @@ protected:
 	glm::vec3 m_v3AmbientLight;
 
 	GLFWwindow* m_window;
+
+	aie::RenderTarget m_renderTarget;
 };
