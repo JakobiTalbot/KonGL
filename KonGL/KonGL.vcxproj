@@ -42,8 +42,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\post\blur.frag" />
+    <None Include="..\bin\shaders\post\chromaticaberration.frag" />
     <None Include="..\bin\shaders\post\crosshatch.frag" />
     <None Include="..\bin\shaders\post\distort.frag" />
+    <None Include="..\bin\shaders\post\dof.frag" />
     <None Include="..\bin\shaders\post\edgedetection.frag" />
     <None Include="..\bin\shaders\post\emboss.frag" />
     <None Include="..\bin\shaders\post\greyscale.frag" />

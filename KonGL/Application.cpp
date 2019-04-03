@@ -9,6 +9,12 @@ Application::Application()
 
 Application::~Application()
 {
+	delete m_perlinTexture;
+	m_perlinTexture = nullptr;
+	delete m_pCamera;
+	m_pCamera = nullptr;
+	delete m_pMesh;
+	m_pMesh = nullptr;
 	glfwDestroyWindow(m_win);
 	glfwTerminate();
 }
@@ -36,16 +42,17 @@ int Application::Init()
 		glfwTerminate();
 		return -3;
 	}
-
+	
 	glEnable(GL_DEPTH_TEST);
 
+	// create variables
 	if (!CreateStuff())
 	{
 		glfwDestroyWindow(m_win);
 		glfwTerminate();
 		return -4;
 	}
-	
+
 	static float fDeltaTime = 0;
 	while (!glfwWindowShouldClose(m_win))
 	{
@@ -71,11 +78,14 @@ bool Application::CreateStuff()
 	m_pCamera = new Camera();
 	m_pMesh = new aie::OBJMesh();
 	m_fullscreenQuad.InitialiseFullscreenQuad();
-
-	m_window = glfwGetCurrentContext();
+	m_perlinTexture = new aie::Texture();
+	
+	// create light values
 	m_light.v3Diffuse = { 1, 1, 1 };
 	m_light.v3Specular = { 1, 1, 1 };
 	m_v3AmbientLight = { 0.25f, 0.25f, 0.25f };
+
+	m_perlinTexture->load("./perlin.png");
 
 	// load vertex and fragment shaders
 	m_textureShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
@@ -91,7 +101,7 @@ bool Application::CreateStuff()
 
 	// load post-processing vertex and fragment shaders
 	m_postProcessing.loadShader(aie::eShaderStage::VERTEX, "./shaders/post/post.vert");
-	m_postProcessing.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post/swirl.frag");
+	m_postProcessing.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post/chromaticaberration.frag");
 
 	if (!m_postProcessing.link())
 	{
@@ -116,6 +126,10 @@ bool Application::CreateStuff()
 		return false;
 	}
 
+	m_renderTarget.getTarget(0).bind(0);	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// set scale for mesh transform
 	const int nScale = 1;
 	// create mesh transform
 	m_m4MeshTransform =
@@ -126,6 +140,7 @@ bool Application::CreateStuff()
 		0, 0, 0, 1
 	};
 
+	// lock cursor to screen
 	m_pCamera->SetLockCursor(true);
 
 	return true;
@@ -150,7 +165,7 @@ void Application::Update(float fDeltaTime)
 		}
 		else
 		{
-			glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			glfwSetInputMode(m_win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			m_pCamera->SetLockCursor(false);
 		}
 	}
@@ -218,10 +233,18 @@ void Application::Draw()
 	m_postProcessing.bind();
 	m_postProcessing.bindUniform("colourTarget", 0);
 
+	// chromatic aberration uniforms
+	//m_postProcessing.bindUniform("noiseTexture", 7);
+	//m_perlinTexture->bind(7);
+	//m_postProcessing.bindUniform("distortionTime", (float)glfwGetTime());
+
 	// swirl uniforms
 	//m_postProcessing.bindUniform("width", (float)GetWindowWidth());
 	//m_postProcessing.bindUniform("height", (float)GetWindowHeight());
 	//m_postProcessing.bindUniform("centre", glm::vec2((float)GetWindowWidth() / 2, (float)GetWindowHeight() / 2));
+
+	// DOF uniforms
+	m_postProcessing.bindUniform("depthImg", )
 
 	m_renderTarget.getTarget(0).bind(0);
 

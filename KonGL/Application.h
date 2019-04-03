@@ -50,10 +50,9 @@ protected:
 	Light m_light;
 	glm::vec3 m_v3AmbientLight;
 
-	GLFWwindow* m_window;
-
 	aie::RenderTarget m_renderTarget;
 
 	bool m_bEscapePressed;
 
+	aie::Texture* m_perlinTexture;
 };
