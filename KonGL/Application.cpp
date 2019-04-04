@@ -234,7 +234,7 @@ void Application::Draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	m_postProcessing.bind();
-	m_postProcessing.bindUniform("colourTarget", 0);
+	m_postProcessing.bindUniform("renderTex", 0);
 
 	// chromatic aberration uniforms
 	//m_postProcessing.bindUniform("noiseTexture", 7);

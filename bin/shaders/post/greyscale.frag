@@ -2,14 +2,14 @@
 
 in vec2 vTexCoord;
 
-uniform sampler2D colourTarget;
+uniform sampler2D renderTex;
 
 out vec4 FragColour;
 
 vec4 Greyscale(vec2 texCoord)
 {
 	// get colour
-	vec4 v4Colour = texture(colourTarget, texCoord);
+	vec4 v4Colour = texture(renderTex, texCoord);
 	// find average value with weighted channels because human eyes are biased towards certain colours
 	float averageRGB = 0.2126f * v4Colour.x + 0.7152f * v4Colour.y + 0.0722f * v4Colour.z;
 	
@@ -20,7 +20,7 @@ vec4 Greyscale(vec2 texCoord)
 void main()
 {
 	// calculate texel size
-	vec2 texSize = textureSize(colourTarget, 0);
+	vec2 texSize = textureSize(renderTex, 0);
 	vec2 texelSize = 1.0f / texSize;
 
 	// adjust texture coordinate

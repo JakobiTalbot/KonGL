@@ -2,19 +2,19 @@
 
 in vec2 vTexCoord;
 
-uniform sampler2D colourTarget;
+uniform sampler2D renderTex;
 
 out vec4 FragColour;
 
 vec4 Invert(vec2 texCoord)
 {
-	return vec4(vec3(1.0f - texture(colourTarget, texCoord)), 1.0f);
+	return vec4(vec3(1.0f - texture(renderTex, texCoord)), 1.0f);
 }
 
 void main()
 {
 	// calculate texel size
-	vec2 texSize = textureSize(colourTarget, 0);
+	vec2 texSize = textureSize(renderTex, 0);
 	vec2 texelSize = 1.0f / texSize;
 
 	// adjust texture coordinate

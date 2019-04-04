@@ -2,7 +2,7 @@
 
 in vec2 vTexCoord;
 
-uniform sampler2D colourTarget;
+uniform sampler2D renderTex;
 
 out vec4 FragColour;
 
@@ -36,7 +36,7 @@ vec4 Blur(vec2 texCoord)
 	vec3 sampleTex[9];
 	for (int i = 0; i < 9; i++)
 	{
-		sampleTex[i] = vec3(texture(colourTarget, texCoord.st + offsets[i]));
+		sampleTex[i] = vec3(texture(renderTex, texCoord.st + offsets[i]));
 	}
 	vec3 col = vec3(0);
 	for (int i = 0; i < 9; i++)
@@ -48,7 +48,7 @@ vec4 Blur(vec2 texCoord)
 void main()
 {
 	// calculate texel size
-	vec2 texSize = textureSize(colourTarget, 0);
+	vec2 texSize = textureSize(renderTex, 0);
 	vec2 texelSize = 1.0f / texSize;
 
 	// adjust texture coordinate

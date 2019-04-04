@@ -2,7 +2,7 @@
 
 in vec2 vTexCoord;
 
-uniform sampler2D colourTarget;
+uniform sampler2D renderTex;
 
 // swirl effect parameters
 uniform float radius = 400.0f;
@@ -29,14 +29,14 @@ vec4 Swirl(vec2 texCoord)
 		tc = vec2(dot(tc, vec2(c, -s)), dot(tc, vec2(s, c)));
 	}
 	tc += centre;
-	vec3 col = texture(colourTarget, tc / texSize).rgb;
+	vec3 col = texture(renderTex, tc / texSize).rgb;
 	return vec4(col, 1.0f);
 }
 
 void main()
 {
 	// calculate texel size
-	vec2 texSize = textureSize(colourTarget, 0);
+	vec2 texSize = textureSize(renderTex, 0);
 	vec2 texelSize = 1.0f / texSize;
 
 	// adjust texture coordinate

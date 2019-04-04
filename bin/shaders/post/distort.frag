@@ -2,7 +2,7 @@
 
 in vec2 vTexCoord;
 
-uniform sampler2D colourTarget;
+uniform sampler2D renderTex;
 
 out vec4 FragColour;
 
@@ -16,13 +16,13 @@ vec4 Distort(vec2 texCoord)
 	float bias = distanceFromCentre + sin(distanceFromCentre * 15) * 0.05f;
 
 	vec2 newCoord = mid + bias * normalisedCoord;
-	return texture(colourTarget, newCoord);
+	return texture(renderTex, newCoord);
 }
 
 void main()
 {
 	// calculate texel size
-	vec2 texSize = textureSize(colourTarget, 0);
+	vec2 texSize = textureSize(renderTex, 0);
 	vec2 texelSize = 1.0f / texSize;
 
 	// adjust texture coordinate

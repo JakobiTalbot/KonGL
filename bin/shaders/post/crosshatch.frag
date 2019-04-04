@@ -2,7 +2,7 @@
 
 in vec2 vTexCoord;
 
-uniform sampler2D colourTarget;
+uniform sampler2D renderTex;
 
 // crosshatch effect parameters
 uniform float offset = 2.0f;
@@ -21,7 +21,7 @@ vec4 Crosshatch(vec2 texCoord)
 	// shouldn't use this many if statements in a shader
 	if (texCoord.x < offset - 0.005f)
 	{
-		float lum = length(texture(colourTarget, texCoord).xyz);
+		float lum = length(texture(renderTex, texCoord).xyz);
 		tc = vec3(1);
 
 		if (lum < lum_threshold_1 && mod(gl_FragCoord.x + gl_FragCoord.y, 10.0f) == 0.0f)
@@ -34,7 +34,7 @@ vec4 Crosshatch(vec2 texCoord)
 			tc = vec3(0);
 	}
 	else if (texCoord.x >= offset + 0.005f)
-		tc = texture(colourTarget, texCoord).xyz;
+		tc = texture(renderTex, texCoord).xyz;
 
 	return vec4(tc, 1);
 }
@@ -42,7 +42,7 @@ vec4 Crosshatch(vec2 texCoord)
 void main()
 {
 	// calculate texel size
-	vec2 texSize = textureSize(colourTarget, 0);
+	vec2 texSize = textureSize(renderTex, 0);
 	vec2 texelSize = 1.0f / texSize;
 
 	// adjust texture coordinate

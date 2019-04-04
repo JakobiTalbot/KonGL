@@ -1,4 +1,4 @@
-uniform sampler2D colourTarget;
+uniform sampler2D renderTex;
 uniform sampler2D depthTex;
 in vec2 vTexCoord;
 //uniform float renderTexWidth;
@@ -36,8 +36,8 @@ float zfar = 100.0; //camera clipping end
 //------------------------------------------
 //user variables
 
-int samples = 3; //samples on the first ring
-int rings = 3; //ring count
+int samples = 4; //samples on the first ring
+int rings = 4; //ring count
 
 bool manualdof = false; //manual dof calculation
 float ndofstart = 1.0; //near dof blur start
@@ -45,7 +45,7 @@ float ndofdist = 2.0; //near dof blur falloff distance
 float fdofstart = 1.0; //far dof blur start
 float fdofdist = 3.0; //far dof blur falloff distance
 
-float CoC = 0.05;//circle of confusion size in mm (35mm film = 0.03mm)
+float CoC = 0.04;//circle of confusion size in mm (35mm film = 0.03mm)
 
 bool vignetting = true; //use optical lens vignetting?
 float vignout = 1.3; //vignetting outer border
@@ -154,9 +154,9 @@ vec3 color(vec2 coords,float blur) //processing the sample
 {
 	vec3 col = vec3(0.0);
 	
-	col.r = texture2D(colourTarget,coords + vec2(0.0,1.0)*texel*fringe*blur).r;
-	col.g = texture2D(colourTarget,coords + vec2(-0.866,-0.5)*texel*fringe*blur).g;
-	col.b = texture2D(colourTarget,coords + vec2(0.866,-0.5)*texel*fringe*blur).b;
+	col.r = texture2D(renderTex,coords + vec2(0.0,1.0)*texel*fringe*blur).r;
+	col.g = texture2D(renderTex,coords + vec2(-0.866,-0.5)*texel*fringe*blur).g;
+	col.b = texture2D(renderTex,coords + vec2(0.866,-0.5)*texel*fringe*blur).b;
 	
 	vec3 lumcoeff = vec3(0.299,0.587,0.114);
 	float lum = dot(col.rgb, lumcoeff);
@@ -263,12 +263,12 @@ void main()
 	
 	if(blur < 0.05) //some optimization thingy
 	{
-		col = texture2D(colourTarget, vTexCoord.xy).rgb;
+		col = texture2D(renderTex, vTexCoord.xy).rgb;
 	}
 	
 	else
 	{
-		col = texture2D(colourTarget, vTexCoord.xy).rgb;
+		col = texture2D(renderTex, vTexCoord.xy).rgb;
 		float s = 1.0;
 		int ringsamples;
 		
@@ -303,7 +303,7 @@ void main()
 		col *= vignette();
 	}
 	
-	//gl_FragColor.rgb = texture(colourTarget, vTexCoord);
+	//gl_FragColor.rgb = texture(renderTex, vTexCoord);
 	gl_FragColor.rgb = col;
 	gl_FragColor.a = 1.0;
 }

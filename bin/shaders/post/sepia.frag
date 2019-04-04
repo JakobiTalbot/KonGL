@@ -2,14 +2,14 @@
 
 in vec2 vTexCoord;
 
-uniform sampler2D colourTarget;
+uniform sampler2D renderTex;
 
 out vec4 FragColour;
 
 vec4 Sepia(vec2 texCoord)
 {
 	// get colour
-	vec4 v4Colour = texture(colourTarget, texCoord);
+	vec4 v4Colour = texture(renderTex, texCoord);
 
 	// magic sepia numbers
 	float r,g,b;
@@ -23,7 +23,7 @@ vec4 Sepia(vec2 texCoord)
 void main()
 {
 	// calculate texel size
-	vec2 texSize = textureSize(colourTarget, 0);
+	vec2 texSize = textureSize(renderTex, 0);
 	vec2 texelSize = 1.0f / texSize;
 
 	// adjust texture coordinate
