@@ -68,7 +68,7 @@ int Application::Init()
 
 bool Application::CreateStuff()
 {
-	glClearColor(0, 0.8f, 1, 1);
+	glClearColor(0.5f, 0.5f, 0.5f, 1);
 	m_fLastTime = 0.f;
 
 	// create simple camera transforms
@@ -101,7 +101,7 @@ bool Application::CreateStuff()
 
 	// load post-processing vertex and fragment shaders
 	m_postProcessing.loadShader(aie::eShaderStage::VERTEX, "./shaders/post/post.vert");
-	m_postProcessing.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post/chromaticaberration.frag");
+	m_postProcessing.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post/dof.frag");
 
 	if (!m_postProcessing.link())
 	{
@@ -111,7 +111,7 @@ bool Application::CreateStuff()
 	}
 
 	// load mesh
-	if (!m_pMesh->load("./models/C++.obj", true, true))
+	if (!m_pMesh->load("./models/Dragon.obj", true, true))
 	{
 		printf("Mesh Load Error!\n");
 		system("pause");
@@ -126,7 +126,8 @@ bool Application::CreateStuff()
 		return false;
 	}
 
-	m_renderTarget.getTarget(0).bind(0);	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	m_renderTarget.getTarget(0).bind(0);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	// set scale for mesh transform
@@ -190,6 +191,8 @@ void Application::Update(float fDeltaTime)
 
 void Application::Draw()
 {
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_renderTarget.getRBO());
 	// bind render target
 	m_renderTarget.bind();
 
@@ -244,7 +247,7 @@ void Application::Draw()
 	//m_postProcessing.bindUniform("centre", glm::vec2((float)GetWindowWidth() / 2, (float)GetWindowHeight() / 2));
 
 	// DOF uniforms
-	m_postProcessing.bindUniform("depthImg", )
+	m_postProcessing.bindUniform("depthTex", 1);
 
 	m_renderTarget.getTarget(0).bind(0);
 

@@ -46,12 +46,22 @@ bool RenderTarget::initialise(unsigned int targetCount, unsigned int width, unsi
 	}
 
 	// setup and bind a 24bit depth buffer as a render buffer
-	glGenRenderbuffers(1, &m_rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24,
-						  width, height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-							  GL_RENDERBUFFER, m_rbo);
+	//glGenRenderbuffers(1, &m_rbo);
+	//glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24,
+	//					  width, height);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+	//						  GL_RENDERBUFFER, m_rbo);
+
+	// depth buffer
+	glGenTextures(1, &m_rbo);
+	glBindTexture(GL_TEXTURE_2D, m_rbo);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1280, 720, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_rbo, 0);
+
+	glUniform1i(m_rbo, 1);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 
