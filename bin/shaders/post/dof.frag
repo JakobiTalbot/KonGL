@@ -8,8 +8,8 @@ in vec2 vTexCoord;
 
 //float width = renderTexWidth; //texture width
 //float height = renderTexHeight; //texture height
-float width = 600; //texture width
-float height = 600; //texture height
+float width = 1280; //texture width
+float height = 720; //texture height
 
 vec2 texel = vec2(1.0/width,1.0/height);
 
@@ -21,9 +21,9 @@ uniform float focalLength; //focal length in mm
 uniform float fstop; //f-stop value
 uniform bool showFocus; //show debug focus point and focal range (red = focal point, green = focal range)
 */
-float focalDepth = 1.5;
+uniform float focalDepth = 1.5;
 float focalLength = 12.0;
-float fstop = 2.0;
+float fstop = 6.9;
 bool showFocus = false;
 
 /* 
@@ -36,8 +36,8 @@ float zfar = 100.0; //camera clipping end
 //------------------------------------------
 //user variables
 
-int samples = 4; //samples on the first ring
-int rings = 4; //ring count
+int samples = 9; //samples on the first ring
+int rings = 5; //ring count
 
 bool manualdof = false; //manual dof calculation
 float ndofstart = 1.0; //near dof blur start
@@ -48,11 +48,11 @@ float fdofdist = 3.0; //far dof blur falloff distance
 float CoC = 0.04;//circle of confusion size in mm (35mm film = 0.03mm)
 
 bool vignetting = true; //use optical lens vignetting?
-float vignout = 1.3; //vignetting outer border
+float vignout = 1.5; //vignetting outer border
 float vignin = 0.0; //vignetting inner border
 float vignfade = 22.0; //f-stops till vignete fades
 
-bool autofocus = true; //use autofocus in shader? disable if you use external focalDepth value
+bool autofocus = false; //use autofocus in shader? disable if you use external focalDepth value
 vec2 focus = vec2(0.5,0.5); // autofocus point on screen (0.0,0.0 - left lower corner, 1.0,1.0 - upper right)
 float maxblur = 3.0; //clamp value of max blur (0.0 = no blur,1.0 default)
 
@@ -60,7 +60,7 @@ float threshold = 0.7; //highlight threshold;
 float gain = 10.0; //highlight gain;
 
 float bias = 0.5; //bokeh edge bias
-float fringe = 0.7; //bokeh chromatic aberration/fringing
+float fringe = 7; //bokeh chromatic aberration/fringing
 
 bool noise = true; //use noise instead of pattern for sample dithering
 float namount = 0.0001; //dither amount
@@ -303,7 +303,5 @@ void main()
 		col *= vignette();
 	}
 	
-	//gl_FragColor.rgb = texture(renderTex, vTexCoord);
-	gl_FragColor.rgb = col;
-	gl_FragColor.a = 1.0;
+	gl_FragColor = vec4(col, 1);
 }

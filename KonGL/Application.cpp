@@ -3,6 +3,11 @@
 #include "glfw/glfw3.h"
 #include <iostream>
 #include "Camera.h"
+
+#define b 0
+#define l 0.8f
+#define u 1.f
+#define e 1.f
 Application::Application()
 {
 }
@@ -21,6 +26,7 @@ Application::~Application()
 
 int Application::Init()
 {
+
 	if (!glfwInit())
 		return -1;
 
@@ -54,6 +60,7 @@ int Application::Init()
 	}
 
 	static float fDeltaTime = 0;
+	// game loop
 	while (!glfwWindowShouldClose(m_win))
 	{
 		fDeltaTime = (float)glfwGetTime() - m_fLastTime;
@@ -68,13 +75,20 @@ int Application::Init()
 
 bool Application::CreateStuff()
 {
-	glClearColor(0.5f, 0.5f, 0.5f, 1);
+	// set background colour
+	glClearColor(b, l, u, e);
+
+	// set last time to 0 (used to calculate delta time)
 	m_fLastTime = 0.f;
+
+	m_bUpdateLight = true;
 
 	// create simple camera transforms
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f,
 		GetWindowWidth() / (float)GetWindowHeight(),
 		0.1f, 1000.f);
+
+	// create objects
 	m_pCamera = new Camera();
 	m_pMesh = new aie::OBJMesh();
 	m_fullscreenQuad.InitialiseFullscreenQuad();
@@ -85,6 +99,7 @@ bool Application::CreateStuff()
 	m_light.v3Specular = { 1, 1, 1 };
 	m_v3AmbientLight = { 0.25f, 0.25f, 0.25f };
 
+	// load perlin noise texture for chromatic aberration
 	m_perlinTexture->load("./perlin.png");
 
 	// load vertex and fragment shaders
@@ -111,7 +126,7 @@ bool Application::CreateStuff()
 	}
 
 	// load mesh
-	if (!m_pMesh->load("./models/Dragon.obj", true, true))
+	if (!m_pMesh->load("./models/model-triangulated.obj", true, true))
 	{
 		printf("Mesh Load Error!\n");
 		system("pause");
@@ -144,6 +159,9 @@ bool Application::CreateStuff()
 	// lock cursor to screen
 	m_pCamera->SetLockCursor(true);
 
+	// set starting light direction
+	m_light.v3Direction = -glm::vec3(m_pCamera->GetTransform()[2]);
+
 	return true;
 }
 
@@ -152,8 +170,18 @@ void Application::Update(float fDeltaTime)
 	// update camera
 	m_pCamera->Update(fDeltaTime);
 
-	// update light
-	m_light.v3Direction = -glm::vec3(m_pCamera->GetTransform()[2]);
+	// set light to update if tab is pressed
+	if (glfwGetKey(m_win, GLFW_KEY_TAB) == GLFW_PRESS && !m_bTabPressed)
+	{
+		m_bUpdateLight = !m_bUpdateLight;
+		m_bTabPressed = true;
+	}
+	else
+		m_bTabPressed = false;
+
+	// update light direction to match camera direction
+	if (m_bUpdateLight)
+		m_light.v3Direction = -glm::vec3(m_pCamera->GetTransform()[2]);
 
 	// if escape is pressed and cursor is locked then unlock cursor
 	// if cursor is already unlocked then quit application
@@ -180,6 +208,7 @@ void Application::Update(float fDeltaTime)
 		m_pCamera->SetLockCursor(true);
 	}
 	
+	// reset window size if changed
 	int x, y;
 	glfwGetWindowSize(m_win, &x, &y);
 	if (m_nWindowWidth != x
@@ -187,6 +216,23 @@ void Application::Update(float fDeltaTime)
 	{
 		glfwSetWindowSize(m_win, m_nWindowWidth, m_nWindowHeight);
 	}
+
+	/////////////////
+	// DOF LERPING //
+	/////////////////
+	float* fPixels = new float[m_nWindowWidth * m_nWindowHeight];
+	glBindTexture(GL_TEXTURE_2D, m_renderTarget.getRBO());
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, fPixels);
+	// set linearised focal depth
+	float f = -100.0f * 0.1f / (fPixels[((m_nWindowHeight / 2)*m_nWindowWidth) + (m_nWindowWidth / 2)] * (100.0f - 0.1f) - 100.0f);
+	// get distance between depths
+	float fDistance = f - m_fFocalDepth;
+	// if the focal depth isn't already very close to the target focal depth
+	if (fabsf(fDistance) > 0.05f)
+		m_fFocalDepth += fDistance * fDeltaTime * 7.f; // lerp
+	// bind focal depth
+	m_postProcessing.bindUniform("focalDepth", m_fFocalDepth);
+	delete[] fPixels;
 }
 
 void Application::Draw()

@@ -53,6 +53,11 @@ protected:
 	aie::RenderTarget m_renderTarget;
 
 	bool m_bEscapePressed;
+	bool m_bTabPressed;
+
+	bool m_bUpdateLight;
 
 	aie::Texture* m_perlinTexture;
+
+	float m_fFocalDepth;
 };
