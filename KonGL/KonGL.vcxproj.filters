@@ -127,5 +127,8 @@
     <None Include="..\bin\shaders\post\dof.frag">
       <Filter>Shaders\Post-processing</Filter>
     </None>
+    <None Include="..\bin\shaders\post\motionblur.frag">
+      <Filter>Shaders\Post-processing</Filter>
+    </None>
   </ItemGroup>
 </Project>

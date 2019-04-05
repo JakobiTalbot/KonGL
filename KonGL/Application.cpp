@@ -4,9 +4,9 @@
 #include <iostream>
 #include "Camera.h"
 
-#define b 0
-#define l 0.8f
-#define u 1.f
+#define b 0.3f
+#define l 0.6f
+#define u 0.8f
 #define e 1.f
 Application::Application()
 {
@@ -73,6 +73,11 @@ int Application::Init()
 	return 0;
 }
 
+void Application::pixelScroll(GLFWwindow* window, double xoffset, double yoffset)
+{
+	m_nPixelCount += yoffset * 10;
+}
+
 bool Application::CreateStuff()
 {
 	// set background colour
@@ -99,6 +104,8 @@ bool Application::CreateStuff()
 	m_light.v3Specular = { 1, 1, 1 };
 	m_v3AmbientLight = { 0.25f, 0.25f, 0.25f };
 
+	m_nPixelCount = 2048;
+
 	// load perlin noise texture for chromatic aberration
 	m_perlinTexture->load("./perlin.png");
 
@@ -116,7 +123,7 @@ bool Application::CreateStuff()
 
 	// load post-processing vertex and fragment shaders
 	m_postProcessing.loadShader(aie::eShaderStage::VERTEX, "./shaders/post/post.vert");
-	m_postProcessing.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post/dof.frag");
+	m_postProcessing.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post/pixelate.frag");
 
 	if (!m_postProcessing.link())
 	{
@@ -161,6 +168,10 @@ bool Application::CreateStuff()
 
 	// set starting light direction
 	m_light.v3Direction = -glm::vec3(m_pCamera->GetTransform()[2]);
+
+
+	//glfwSetScrollCallback(m_win, pixelScroll);
+	
 
 	return true;
 }
@@ -237,6 +248,7 @@ void Application::Update(float fDeltaTime)
 
 void Application::Draw()
 {
+	m_m4PrevModelViewProj = glm::inverse(m_pCamera->GetView());
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_renderTarget.getRBO());
 	// bind render target
@@ -253,7 +265,7 @@ void Application::Draw()
 
 	// bind shader
 	m_textureShader.bind();
-
+	
 	// bind light variables
 	m_textureShader.bindUniform("Ia", m_v3AmbientLight);
 	m_textureShader.bindUniform("Id", m_light.v3Diffuse);
@@ -274,7 +286,7 @@ void Application::Draw()
 	m_textureShader.bindUniform("m4ModelMatrix", m_m4MeshTransform);
 
 	// draw mesh
-	m_pMesh->draw();
+	m_pMesh->draw();	
 
 	m_renderTarget.unbind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -293,7 +305,14 @@ void Application::Draw()
 	//m_postProcessing.bindUniform("centre", glm::vec2((float)GetWindowWidth() / 2, (float)GetWindowHeight() / 2));
 
 	// DOF uniforms
-	m_postProcessing.bindUniform("depthTex", 1);
+	//m_postProcessing.bindUniform("depthTex", 1);
+
+	// motion blur uniforms
+	//m_postProcessing.bindUniform("depthTex", 1);
+	//m_postProcessing.bindUniform("inverseModelView", m_pCamera->GetTransform());
+	//m_postProcessing.bindUniform("inverseProj", glm::inverse(m_projectionMatrix));
+	//m_postProcessing.bindUniform("prevModelViewProj", m_m4PrevModelViewProj);
+
 
 	m_renderTarget.getTarget(0).bind(0);
 

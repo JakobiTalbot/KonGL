@@ -44,7 +44,7 @@ void Camera::Update(float delta)
 		move *= 2;
 	// move slower if ctrl is held
 	else if (glfwGetKey(m_win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		move *= 0.5f;
+		move *= 0.2f;
 
 	this->Move(glm::vec3(move) * m_moveSpeed * delta);
 

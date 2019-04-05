@@ -24,6 +24,8 @@ public:
 	int GetWindowHeight() { return m_nWindowHeight; }
 	int GetWindowWidth() { return m_nWindowWidth; }
 
+	void pixelScroll(GLFWwindow* window, double xoffset, double yoffset);
+
 protected:
 	GLFWwindow* m_win;
 	int m_nWindowHeight, m_nWindowWidth;
@@ -60,4 +62,8 @@ protected:
 	aie::Texture* m_perlinTexture;
 
 	float m_fFocalDepth;
+
+	glm::mat4 m_m4PrevModelViewProj;
+
+	int m_nPixelCount;
 };

@@ -3,14 +3,13 @@
 in vec2 vTexCoord;
 
 uniform sampler2D renderTex;
-
+uniform int pixels = 2048;
 out vec4 FragColour;
 
 vec4 Pixelate(vec2 texCoord)
 {
-	float fPixels = 2048.0f;
-	float dx = 15.0f * (1.0f / fPixels);
-	float dy = 10.0f * (1.0f / fPixels);
+	float dx = 15.0f * (1.0f / pixels);
+	float dy = 10.0f * (1.0f / pixels);
 	vec2 v2Coord = vec2(dx * floor(texCoord.x / dx), dy * floor(texCoord.y / dy));
 	return texture(renderTex, v2Coord);
 }
