@@ -5,16 +5,14 @@
 #include "Camera.h"
 #include "ShaderChanger.h"
 
-#define b 0.3f
-#define l 0.6f
-#define u 0.8f
-#define e 1.f
+
 Application::Application()
 {
 }
 
 Application::~Application()
 {
+	// delete values
 	delete m_pCamera;
 	m_pCamera = nullptr;
 	delete m_pMesh;
@@ -27,22 +25,26 @@ Application::~Application()
 
 int Application::Init()
 {
-
+	// initiate GLFW
 	if (!glfwInit())
 		return -1;
 
+	// create window
 	m_nWindowWidth = 1280;
 	m_nWindowHeight = 720;
 	m_win = glfwCreateWindow(m_nWindowWidth, m_nWindowHeight, "KonGL", nullptr, nullptr);
 
+	// check if window was created successfully or not
 	if (!m_win)
 	{
 		glfwTerminate();
 		return -2;
 	}
 
+	// make window current context
 	glfwMakeContextCurrent(m_win);
 
+	// load GL functions
 	if (ogl_LoadFunctions() == ogl_LOAD_FAILED)
 	{
 		glfwDestroyWindow(m_win);
@@ -73,13 +75,15 @@ int Application::Init()
 		glfwSwapBuffers(m_win);
 		glfwPollEvents();
 	}
+
+	// exit without error
 	return 0;
 }
 
 bool Application::CreateStuff()
 {
 	// set background colour
-	glClearColor(b, l, u, e);
+	glClearColor(0.3f, 0.6f, 0.8f, 1.f);
 
 	// set last time to 0 (used to calculate delta time)
 	m_fLastTime = 0.f;

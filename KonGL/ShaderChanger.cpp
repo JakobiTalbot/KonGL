@@ -26,19 +26,20 @@ bool ShaderChanger::Init()
 		return false;
 	}
 	// set shader paths
-	m_shaderPaths[0] = "./shaders/post/blur.frag";
-	m_shaderPaths[1] = "./shaders/post/chromaticaberration.frag";
-	m_shaderPaths[2] = "./shaders/post/crosshatch.frag";
-	m_shaderPaths[3] = "./shaders/post/distort.frag";
-	m_shaderPaths[4] = "./shaders/post/dof.frag";
-	m_shaderPaths[5] = "./shaders/post/edgedetection.frag";
-	m_shaderPaths[6] = "./shaders/post/emboss.frag";
-	m_shaderPaths[7] = "./shaders/post/greyscale.frag";
-	m_shaderPaths[8] = "./shaders/post/invert.frag";
-	m_shaderPaths[9] = "./shaders/post/pixelate.frag";
-	m_shaderPaths[10] = "./shaders/post/sepia.frag";
-	m_shaderPaths[11] = "./shaders/post/sharpen.frag";
-	m_shaderPaths[12] = "./shaders/post/swirl.frag";
+	m_shaderPaths[0] = "./shaders/post/nopost.frag";
+	m_shaderPaths[1] = "./shaders/post/blur.frag";
+	m_shaderPaths[2] = "./shaders/post/chromaticaberration.frag";
+	m_shaderPaths[3] = "./shaders/post/crosshatch.frag";
+	m_shaderPaths[4] = "./shaders/post/distort.frag";
+	m_shaderPaths[5] = "./shaders/post/dof.frag";
+	m_shaderPaths[6] = "./shaders/post/edgedetection.frag";
+	m_shaderPaths[7] = "./shaders/post/emboss.frag";
+	m_shaderPaths[8] = "./shaders/post/greyscale.frag";
+	m_shaderPaths[9] = "./shaders/post/invert.frag";
+	m_shaderPaths[10] = "./shaders/post/pixelate.frag";
+	m_shaderPaths[11] = "./shaders/post/sepia.frag";
+	m_shaderPaths[12] = "./shaders/post/sharpen.frag";
+	m_shaderPaths[13] = "./shaders/post/swirl.frag";
 
 	// set current shader
 	ChangeShader(m_eCurrentEffect);
@@ -78,7 +79,7 @@ void ShaderChanger::Update(float fDeltaTime)
 		&& !m_bUpArrowDown)
 	{
 		// wrap around to first shader if on last shader
-		if (m_eCurrentEffect == PostEffects::swirl)
+		if ((int)m_eCurrentEffect == (int)PostEffects::LENGTH - 1)
 			ChangeShader((PostEffects)0);
 		else // set shader to next in array
 			ChangeShader((PostEffects)((int)m_eCurrentEffect + 1));
@@ -94,7 +95,7 @@ void ShaderChanger::Update(float fDeltaTime)
 			 && !m_bDownArrowDown)
 	{
 		// wrap around to last shader if on first shader
-		if (m_eCurrentEffect == PostEffects::blur)
+		if ((int)m_eCurrentEffect == 0)
 			ChangeShader((PostEffects)((int)PostEffects::LENGTH - 1));
 		else // set shader to previous in array
 			ChangeShader((PostEffects)((int)m_eCurrentEffect - 1));

@@ -52,6 +52,7 @@
     <None Include="..\bin\shaders\post\emboss.frag" />
     <None Include="..\bin\shaders\post\greyscale.frag" />
     <None Include="..\bin\shaders\post\invert.frag" />
+    <None Include="..\bin\shaders\post\nopost.frag" />
     <None Include="..\bin\shaders\post\pixelate.frag" />
     <None Include="..\bin\shaders\post\post.vert" />
     <None Include="..\bin\shaders\post\sepia.frag" />

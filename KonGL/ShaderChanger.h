@@ -6,7 +6,8 @@
 // stores all post-processing effects
 enum class PostEffects
 {
-	blur = 0,
+	none = 0,
+	blur,
 	chromaticAberration,
 	crossHatch,
 	distort,
@@ -65,9 +66,9 @@ public:
 
 private:
 	// stores path to each post-processing fragment shader
-	const char* m_shaderPaths[13];
+	const char* m_shaderPaths[14];
 	// stores the current post-processing effect enum, blur by default
-	PostEffects m_eCurrentEffect = PostEffects::blur;
+	PostEffects m_eCurrentEffect = PostEffects::none;
 	// shader for drawing the post-processing effects
 	aie::ShaderProgram m_currentShader;
 	// perlin noise texture for chromatic aberration post-processing effect
