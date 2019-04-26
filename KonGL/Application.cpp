@@ -3,6 +3,7 @@
 #include "glfw/glfw3.h"
 #include <iostream>
 #include "Camera.h"
+#include "ShaderChanger.h"
 
 #define b 0.3f
 #define l 0.6f
@@ -14,12 +15,12 @@ Application::Application()
 
 Application::~Application()
 {
-	delete m_perlinTexture;
-	m_perlinTexture = nullptr;
 	delete m_pCamera;
 	m_pCamera = nullptr;
 	delete m_pMesh;
 	m_pMesh = nullptr;
+	delete m_pShaderChanger;
+	m_pShaderChanger = nullptr;
 	glfwDestroyWindow(m_win);
 	glfwTerminate();
 }
@@ -59,11 +60,13 @@ int Application::Init()
 		return -4;
 	}
 
+	// create delta time
 	static float fDeltaTime = 0;
 	// game loop
 	while (!glfwWindowShouldClose(m_win))
 	{
 		fDeltaTime = (float)glfwGetTime() - m_fLastTime;
+		m_fDeltaTime = fDeltaTime;
 		m_fLastTime = (float)glfwGetTime();
 		Update(fDeltaTime);
 		Draw();
@@ -71,11 +74,6 @@ int Application::Init()
 		glfwPollEvents();
 	}
 	return 0;
-}
-
-void Application::pixelScroll(GLFWwindow* window, double xoffset, double yoffset)
-{
-	m_nPixelCount += yoffset * 10;
 }
 
 bool Application::CreateStuff()
@@ -97,17 +95,12 @@ bool Application::CreateStuff()
 	m_pCamera = new Camera();
 	m_pMesh = new aie::OBJMesh();
 	m_fullscreenQuad.InitialiseFullscreenQuad();
-	m_perlinTexture = new aie::Texture();
+	m_pShaderChanger = new ShaderChanger();
 	
 	// create light values
 	m_light.v3Diffuse = { 1, 1, 1 };
 	m_light.v3Specular = { 1, 1, 1 };
 	m_v3AmbientLight = { 0.25f, 0.25f, 0.25f };
-
-	m_nPixelCount = 2048;
-
-	// load perlin noise texture for chromatic aberration
-	m_perlinTexture->load("./perlin.png");
 
 	// load vertex and fragment shaders
 	m_textureShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
@@ -117,17 +110,6 @@ bool Application::CreateStuff()
 	if (!m_textureShader.link())
 	{
 		printf("Shader Error: %s\n", m_textureShader.getLastError());
-		system("pause");
-		return false;
-	}
-
-	// load post-processing vertex and fragment shaders
-	m_postProcessing.loadShader(aie::eShaderStage::VERTEX, "./shaders/post/post.vert");
-	m_postProcessing.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post/pixelate.frag");
-
-	if (!m_postProcessing.link())
-	{
-		printf("Post-processing Shader Load Error: %s\n", m_postProcessing.getLastError());
 		system("pause");
 		return false;
 	}
@@ -228,27 +210,11 @@ void Application::Update(float fDeltaTime)
 		glfwSetWindowSize(m_win, m_nWindowWidth, m_nWindowHeight);
 	}
 
-	/////////////////
-	// DOF LERPING //
-	/////////////////
-	float* fPixels = new float[m_nWindowWidth * m_nWindowHeight];
-	glBindTexture(GL_TEXTURE_2D, m_renderTarget.getRBO());
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, fPixels);
-	// set linearised focal depth
-	float f = -100.0f * 0.1f / (fPixels[((m_nWindowHeight / 2)*m_nWindowWidth) + (m_nWindowWidth / 2)] * (100.0f - 0.1f) - 100.0f);
-	// get distance between depths
-	float fDistance = f - m_fFocalDepth;
-	// if the focal depth isn't already very close to the target focal depth
-	if (fabsf(fDistance) > 0.05f)
-		m_fFocalDepth += fDistance * fDeltaTime * 7.f; // lerp
-	// bind focal depth
-	m_postProcessing.bindUniform("focalDepth", m_fFocalDepth);
-	delete[] fPixels;
+	m_pShaderChanger->Update(fDeltaTime);
 }
 
 void Application::Draw()
 {
-	m_m4PrevModelViewProj = glm::inverse(m_pCamera->GetView());
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_renderTarget.getRBO());
 	// bind render target
@@ -291,28 +257,8 @@ void Application::Draw()
 	m_renderTarget.unbind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	m_postProcessing.bind();
-	m_postProcessing.bindUniform("renderTex", 0);
-
-	// chromatic aberration uniforms
-	//m_postProcessing.bindUniform("noiseTexture", 7);
-	//m_perlinTexture->bind(7);
-	//m_postProcessing.bindUniform("distortionTime", (float)glfwGetTime());
-
-	// swirl uniforms
-	//m_postProcessing.bindUniform("width", (float)GetWindowWidth());
-	//m_postProcessing.bindUniform("height", (float)GetWindowHeight());
-	//m_postProcessing.bindUniform("centre", glm::vec2((float)GetWindowWidth() / 2, (float)GetWindowHeight() / 2));
-
-	// DOF uniforms
-	//m_postProcessing.bindUniform("depthTex", 1);
-
-	// motion blur uniforms
-	//m_postProcessing.bindUniform("depthTex", 1);
-	//m_postProcessing.bindUniform("inverseModelView", m_pCamera->GetTransform());
-	//m_postProcessing.bindUniform("inverseProj", glm::inverse(m_projectionMatrix));
-	//m_postProcessing.bindUniform("prevModelViewProj", m_m4PrevModelViewProj);
-
+	m_pShaderChanger->GetShader()->bind();
+	m_pShaderChanger->BindUniforms(m_nWindowWidth, m_nWindowHeight, m_fDeltaTime, &m_renderTarget);
 
 	m_renderTarget.getTarget(0).bind(0);
 

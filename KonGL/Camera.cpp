@@ -14,7 +14,7 @@ Camera::Camera()
 }
 
 // upd8
-void Camera::Update(float delta) 
+void Camera::Update(float fDeltaTime)
 {
 	// movement
 	glm::vec4 move(0);
@@ -46,13 +46,13 @@ void Camera::Update(float delta)
 	else if (glfwGetKey(m_win, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		move *= 0.2f;
 
-	this->Move(glm::vec3(move) * m_moveSpeed * delta);
+	this->Move(glm::vec3(move) * m_moveSpeed * fDeltaTime);
 
 
 	if (m_bLockCursor) {
 		// rotation
 
-		// get window size for locking and stuff homie
+		// get window size for locking
 		int wx, wy;
 		glfwGetWindowSize(glfwGetCurrentContext(), &wx, &wy);
 
@@ -68,7 +68,7 @@ void Camera::Update(float delta)
 
 		// multiply by something tiny because it is crazy
 		const float sens = 0.001f;
-		// add to rotation :D
+		// add to rotation
 		this->Rotate(rotate*sens);
 
 		// locking cursor to the middle
@@ -104,7 +104,7 @@ void Camera::SetLockCursor(bool l)
 	// to the window
 	glfwSetInputMode(win, GLFW_CURSOR, l ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
-	// set cursor to centre of screen if unlocking cursor
+	// set cursor to centre of the window if unlocking cursor
 	if (!l)
 	{
 		int wx, wy;

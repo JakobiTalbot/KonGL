@@ -13,11 +13,28 @@ public:
 		glm::vec2 v2TexCoord;
 	};
 
+	/*
+		@brief Initialises a mesh with specified variables
+		@param Number of vertices for the mesh to have
+		@param Vertices to fill the vertex buffer with
+		@param Number of indices for the mesh to have
+		@param Indices to fill the vertex buffer with
+	*/
 	void Initialise(unsigned int nVertexCount, const Vertex* pVertices, unsigned int nIndexCount = 0, unsigned int* pIndices = nullptr);
+
+	/*
+		@brief Creates the mesh as a fullscreen quad
+	*/
 	void InitialiseFullscreenQuad();
 
+	/*
+		@brief Initialises a quad
+	*/
 	void InitQuad();
 	
+	/*
+		@brief Draws the mesh
+	*/
 	virtual void Draw();
 
 protected:

@@ -27,6 +27,7 @@
     <ClCompile Include="OBJMesh.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShaderChanger.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +38,7 @@
     <ClInclude Include="OBJMesh.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderChanger.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
@@ -50,7 +52,6 @@
     <None Include="..\bin\shaders\post\emboss.frag" />
     <None Include="..\bin\shaders\post\greyscale.frag" />
     <None Include="..\bin\shaders\post\invert.frag" />
-    <None Include="..\bin\shaders\post\motionblur.frag" />
     <None Include="..\bin\shaders\post\pixelate.frag" />
     <None Include="..\bin\shaders\post\post.vert" />
     <None Include="..\bin\shaders\post\sepia.frag" />

@@ -48,6 +48,9 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderChanger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderChanger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -125,9 +131,6 @@
       <Filter>Shaders\Post-processing</Filter>
     </None>
     <None Include="..\bin\shaders\post\dof.frag">
-      <Filter>Shaders\Post-processing</Filter>
-    </None>
-    <None Include="..\bin\shaders\post\motionblur.frag">
       <Filter>Shaders\Post-processing</Filter>
     </None>
   </ItemGroup>
